@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'usuarios',
     'atividades',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -134,6 +135,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API - Plataforma de Atividades Escolares',
+    'DESCRIPTION': 'Documentação dos endpoints de Professores e Alunos.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
