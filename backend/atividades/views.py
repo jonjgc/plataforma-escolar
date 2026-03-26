@@ -1,9 +1,10 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import Atividade, Resposta
-from .serializers import AtividadeSerializer, RespostaAlunoSerializer, RespostaProfessorSerializer
+from .models import Turma, Atividade, Resposta
+from .serializers import TurmaSerializer, AtividadeSerializer, RespostaAlunoSerializer, RespostaProfessorSerializer
 from .permissions import IsProfessor, IsAluno
 from .services import RespostaService
 
@@ -23,7 +24,8 @@ class MeAtividadesView(generics.ListAPIView):
 
 # Fluxo do PROFESSOR
 
-class AtividadeCreateView(generics.CreateAPIView):
+class AtividadeCreateView(generics.ListCreateAPIView):
+    queryset = Atividade.objects.all() 
     serializer_class = AtividadeSerializer
     permission_classes = [IsProfessor]
 
@@ -86,3 +88,8 @@ class RespostaUpdateView(APIView):
                 
             resposta_atualizada = RespostaService.avaliar_resposta_professor(user, resposta, nota, feedback)
             return Response(RespostaProfessorSerializer(resposta_atualizada).data)
+
+class TurmaViewSet(viewsets.ModelViewSet):
+    queryset = Turma.objects.all()
+    serializer_class = TurmaSerializer
+    permission_classes = [IsAuthenticated]

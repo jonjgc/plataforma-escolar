@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Atividade, Resposta
+from .models import Turma, Atividade, Resposta
+
+class TurmaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Turma
+        fields = '__all__'
 
 class AtividadeSerializer(serializers.ModelSerializer):
     class Meta:
