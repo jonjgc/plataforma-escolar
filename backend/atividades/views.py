@@ -1,3 +1,4 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework import generics, permissions, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -27,7 +28,7 @@ class MeAtividadesView(generics.ListAPIView):
 class AtividadeCreateView(generics.ListCreateAPIView):
     queryset = Atividade.objects.all() 
     serializer_class = AtividadeSerializer
-    permission_classes = [IsProfessor]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(professor=self.request.user)
@@ -51,7 +52,7 @@ class RespostaCreateView(generics.CreateAPIView):
         atividade = serializer.validated_data['atividade']
         
         if not atividade.turma.alunos.filter(id=self.request.user.id).exists():
-            raise permissions.PermissionDenied("Você não pertence à turma desta atividade.")
+            raise PermissionDenied("Você não pertence à turma desta atividade.")
         
         RespostaService.validar_prazo_atividade(atividade)
         
