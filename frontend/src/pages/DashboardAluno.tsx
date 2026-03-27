@@ -9,22 +9,48 @@ interface Atividade {
   data_entrega: string;
 }
 
+interface Resposta {
+  id: number;
+  atividade: number;
+  texto: string;
+}
+
 const DashboardAluno: React.FC = () => {
   const { logout } = useContext(AuthContext);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
-  const [resposta, setResposta] = useState('');
+  const [minhasRespostas, setMinhasRespostas] = useState<Resposta[]>([]);
+
+  const [respostaTexto, setRespostaTexto] = useState('');
   const [atividadeSelecionada, setAtividadeSelecionada] = useState<Atividade | null>(null);
+  const [respostaExistenteId, setRespostaExistenteId] = useState<number | null>(null);
 
   useEffect(() => {
-    carregarAtividades();
+    carregarDados();
   }, []);
 
-  const carregarAtividades = async () => {
+  const carregarDados = async () => {
     try {
-      const response = await api.get('/atividades/');
-      setAtividades(response.data);
+      const resAtividades = await api.get('/atividades/');
+      setAtividades(resAtividades.data);
+
+      const resRespostas = await api.get('/respostas/');
+      setMinhasRespostas(resRespostas.data);
     } catch (error) {
-      console.error("Erro ao buscar atividades", error);
+      console.error("Erro ao buscar dados", error);
+    }
+  };
+
+  const handleAbrirResposta = (atv: Atividade) => {
+    setAtividadeSelecionada(atv);
+
+    const respostaEnviada = minhasRespostas.find(r => r.atividade === atv.id);
+
+    if (respostaEnviada) {
+      setRespostaTexto(respostaEnviada.texto);
+      setRespostaExistenteId(respostaEnviada.id);
+    } else {
+      setRespostaTexto('');
+      setRespostaExistenteId(null);
     }
   };
 
@@ -33,18 +59,32 @@ const DashboardAluno: React.FC = () => {
     if (!atividadeSelecionada) return;
 
     try {
-      await api.post('/respostas/', {
-        texto: resposta,
-        atividade: atividadeSelecionada.id
-      });
-      
-      alert('Resposta enviada com sucesso!');
-      setResposta('');
+      if (respostaExistenteId) {
+        await api.patch(`/respostas/${respostaExistenteId}/`, {
+          texto: respostaTexto
+        });
+        alert('Resposta atualizada com sucesso!');
+      } else {
+        await api.post('/respostas/', {
+          texto: respostaTexto,
+          atividade: atividadeSelecionada.id
+        });
+        alert('Resposta enviada com sucesso!');
+      }
+
+      setRespostaTexto('');
       setAtividadeSelecionada(null);
-    } catch (error) {
+      setRespostaExistenteId(null);
+      carregarDados();
+
+    } catch (error: any) {
       console.error("Erro ao enviar resposta", error);
-      alert('Erro ao enviar resposta. Verifique se você já respondeu esta atividade.');
+      alert(error.response?.data?.detail || 'Erro ao processar sua resposta.');
     }
+  };
+
+  const prazoEncerrado = (dataString: string) => {
+    return new Date() > new Date(dataString);
   };
 
   return (
@@ -60,42 +100,52 @@ const DashboardAluno: React.FC = () => {
           <p>Nenhuma atividade disponível no momento.</p>
         ) : (
           <div style={{ display: 'grid', gap: '15px' }}>
-            {atividades.map(atv => (
-              <div key={atv.id} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', background: atividadeSelecionada?.id === atv.id ? '#e7f3ff' : '#fff' }}>
-                <h4 style={{ margin: '0 0 5px 0' }}>{atv.titulo}</h4>
-                <p style={{ fontSize: '14px', color: '#444' }}>{atv.descricao}</p>
-                <p style={{ fontSize: '12px', color: '#666' }}>Prazo: {new Date(atv.data_entrega).toLocaleString('pt-BR')}</p>
-                
-                {!atividadeSelecionada && (
-                  <button 
-                    onClick={() => setAtividadeSelecionada(atv)}
-                    style={{ marginTop: '10px', padding: '5px 10px', cursor: 'pointer', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}
-                  >
-                    Responder
-                  </button>
-                )}
-              </div>
-            ))}
+            {atividades.map(atv => {
+              const respostaEnviada = minhasRespostas.find(r => r.atividade === atv.id);
+              const isEncerrado = prazoEncerrado(atv.data_entrega);
+
+              return (
+                <div key={atv.id} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', background: atividadeSelecionada?.id === atv.id ? '#e7f3ff' : '#fff' }}>
+                  <h4 style={{ margin: '0 0 5px 0' }}>{atv.titulo}</h4>
+                  <p style={{ fontSize: '14px', color: '#444' }}>{atv.descricao}</p>
+
+                  <div style={{ display: 'flex', gap: '15px', fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                    <span>📅 Prazo: {new Date(atv.data_entrega).toLocaleString('pt-BR')}</span>
+                    {respostaEnviada && <span style={{ color: '#28a745', fontWeight: 'bold' }}>✅ Respondida</span>}
+                    {isEncerrado && <span style={{ color: '#dc3545', fontWeight: 'bold' }}>❌ Encerrada</span>}
+                  </div>
+
+                  {!atividadeSelecionada && !isEncerrado && (
+                    <button
+                      onClick={() => handleAbrirResposta(atv)}
+                      style={{ marginTop: '15px', padding: '8px 12px', cursor: 'pointer', background: respostaEnviada ? '#ffc107' : '#007bff', color: respostaEnviada ? '#000' : '#fff', border: 'none', borderRadius: '4px', fontWeight: 'bold' }}
+                    >
+                      {respostaEnviada ? 'Editar Resposta' : 'Responder'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
         {atividadeSelecionada && (
           <section style={{ marginTop: '30px', padding: '20px', border: '2px solid #007bff', borderRadius: '8px' }}>
-            <h4>Respondendo: {atividadeSelecionada.titulo}</h4>
+            <h4>{respostaExistenteId ? 'Editando Resposta:' : 'Respondendo:'} {atividadeSelecionada.titulo}</h4>
             <form onSubmit={handleEnviarResposta} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-              <textarea 
-                placeholder="Escreva sua resposta aqui..." 
-                value={resposta} 
-                onChange={e => setResposta(e.target.value)}
+              <textarea
+                placeholder="Escreva sua resposta aqui..."
+                value={respostaTexto}
+                onChange={e => setRespostaTexto(e.target.value)}
                 required
                 style={{ padding: '10px', minHeight: '120px' }}
               />
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button type="submit" style={{ flex: 1, padding: '10px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                  Enviar Resposta
+                  {respostaExistenteId ? 'Atualizar Resposta' : 'Enviar Resposta'}
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setAtividadeSelecionada(null)}
                   style={{ padding: '10px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                 >
