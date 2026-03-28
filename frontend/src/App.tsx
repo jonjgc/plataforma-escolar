@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
+import { Footer } from './components/ui/Footer'; 
 import Login from './pages/Login';
 import DashboardProfessor from './pages/DashboardProfessor';
 import DashboardAluno from './pages/DashboardAluno';
@@ -26,7 +27,15 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          
+          <div style={{ flex: 1 }}>
+            <AppRoutes />
+          </div>
+
+          <Footer />
+
+        </div>
       </Router>
     </AuthProvider>
   );

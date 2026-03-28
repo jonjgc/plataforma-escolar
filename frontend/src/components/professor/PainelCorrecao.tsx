@@ -57,18 +57,23 @@ const PainelCorrecao: React.FC<PainelCorrecaoProps> = ({ atividade, respostas, o
               <div style={{ background: '#fff', padding: '15px', border: '1px solid #e9ecef', borderRadius: '4px', whiteSpace: 'pre-wrap', marginBottom: '15px' }}>
                 {resp.texto}
               </div>
-              <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', borderTop: '1px dashed #ccc', paddingTop: '15px' }}>
-                <div style={{ width: '100px' }}>
+              <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start', borderTop: '1px dashed #ccc', paddingTop: '15px', flexWrap: 'wrap' }}>
+                
+                <div style={{ flex: '1 1 100px', minWidth: '100px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold' }}>Nota (0 a 10)*</label>
-                  <input type="number" min="0" max="10" step="0.1" required value={notas[resp.id] ?? (resp.nota ?? '')} onChange={e => setNotas({...notas, [resp.id]: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px' }} />
+                  <input type="number" min="0" max="10" step="0.1" required value={notas[resp.id] ?? (resp.nota ?? '')} onChange={e => setNotas({...notas, [resp.id]: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 </div>
-                <div style={{ flex: 1 }}>
+                
+                <div style={{ flex: '3 1 200px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold' }}>Feedback</label>
-                  <textarea value={feedbacks[resp.id] ?? (resp.feedback ?? '')} onChange={e => setFeedbacks({...feedbacks, [resp.id]: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px', minHeight: '40px' }} />
+                  <textarea value={feedbacks[resp.id] ?? (resp.feedback ?? '')} onChange={e => setFeedbacks({...feedbacks, [resp.id]: e.target.value})} style={{ width: '100%', padding: '8px', marginTop: '5px', minHeight: '40px', borderRadius: '4px', border: '1px solid #ccc' }} />
                 </div>
-                <button onClick={() => handleAvaliarResposta(resp.id)} style={{ marginTop: '22px', padding: '10px 15px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                  Salvar Nota
-                </button>
+                
+                <div style={{ flex: '1 1 100%', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button onClick={() => handleAvaliarResposta(resp.id)} style={{ padding: '10px 15px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                    Salvar Nota
+                  </button>
+                </div>
               </div>
             </div>
           ))}
