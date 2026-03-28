@@ -10,6 +10,7 @@ export interface Atividade {
   titulo: string;
   descricao: string;
   data_entrega: string;
+  turma: number;
 }
 
 export interface Turma {
@@ -21,6 +22,7 @@ export interface Resposta {
   id: number;
   atividade: number;
   aluno: number; 
+  aluno_nome?: string;
   texto: string;
   criado_em?: string;
   nota?: number | null;
@@ -79,6 +81,7 @@ const DashboardProfessor: React.FC = () => {
         <PainelCorrecao 
           atividade={atividadeSelecionada} 
           respostas={respostas} 
+          nomeTurma={turmas.find(t => t.id === atividadeSelecionada.turma)?.nome || 'Turma não identificada'}
           onVoltar={() => setAtividadeSelecionada(null)} 
           onAvaliacaoSalva={() => handleVerRespostas(atividadeSelecionada)} 
         />

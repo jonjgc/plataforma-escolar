@@ -13,13 +13,27 @@ class AtividadeSerializer(serializers.ModelSerializer):
         read_only_fields = ['professor']
 
 class RespostaAlunoSerializer(serializers.ModelSerializer):
+    aluno_nome = serializers.SerializerMethodField()
+
     class Meta:
         model = Resposta
-        fields = ['id', 'atividade', 'aluno', 'texto', 'nota', 'feedback', 'criado_em', 'atualizado_em']
-        read_only_fields = ['aluno', 'nota', 'feedback']
+        fields = ['id', 'atividade', 'aluno', 'aluno_nome', 'texto', 'nota', 'feedback', 'criado_em', 'atualizado_em']
+        read_only_fields = ['aluno', 'aluno_nome', 'nota', 'feedback']
+
+    def get_aluno_nome(self, obj):
+        if getattr(obj.aluno, 'nome', None):
+            return obj.aluno.nome
+        return getattr(obj.aluno, 'email', f"Aluno ID {obj.aluno.id}")
 
 class RespostaProfessorSerializer(serializers.ModelSerializer):
+    aluno_nome = serializers.SerializerMethodField()
+
     class Meta:
         model = Resposta
-        fields = ['id', 'atividade', 'aluno', 'texto', 'nota', 'feedback']
-        read_only_fields = ['atividade', 'aluno', 'texto']
+        fields = ['id', 'atividade', 'aluno', 'aluno_nome', 'texto', 'nota', 'feedback']
+        read_only_fields = ['atividade', 'aluno', 'aluno_nome', 'texto']
+
+    def get_aluno_nome(self, obj):
+        if getattr(obj.aluno, 'nome', None):
+            return obj.aluno.nome
+        return getattr(obj.aluno, 'email', f"Aluno ID {obj.aluno.id}")

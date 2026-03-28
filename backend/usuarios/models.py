@@ -22,6 +22,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('ALUNO', 'Aluno'),
     )
 
+    nome = models.CharField(max_length=150, blank=True, null=True)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='ALUNO')
     is_active = models.BooleanField(default=True)
