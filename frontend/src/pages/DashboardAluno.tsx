@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { AuthContext } from '../contexts/AuthContext';
 import FormularioResposta from '../components/aluno/FormularioResposta';
 import ListaAtividadesAluno from '../components/aluno/ListaAtividadesAluno';
+import { Header } from '../components/ui/Header';
 
 export interface Atividade {
   id: number;
@@ -20,7 +20,6 @@ export interface Resposta {
 }
 
 const DashboardAluno: React.FC = () => {
-  const { logout } = useContext(AuthContext);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [minhasRespostas, setMinhasRespostas] = useState<Resposta[]>([]);
   
@@ -85,15 +84,11 @@ const DashboardAluno: React.FC = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #ccc', paddingBottom: '10px' }}>
-        <h2>Portal do Aluno</h2>
-        <button onClick={logout} style={{ padding: '8px 16px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Sair</button>
-      </header>
-
-      <main style={{ marginTop: '20px' }}>
+    <Header titulo="Portal do Aluno" />
+    
+    <main style={{ marginTop: '20px' }}>
         <h3>Suas Atividades</h3>
         
-        {/* COMPONENTE DA LISTA AQUI 👇 */}
         <ListaAtividadesAluno 
           atividades={atividades}
           minhasRespostas={minhasRespostas}
