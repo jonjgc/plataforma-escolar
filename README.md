@@ -140,6 +140,6 @@ No backend foi usado testes automatizados de regras de negócio usando o Django 
 docker-compose run --rm backend python manage.py test
 ```
 
-# Observação: 
+#### Observação: 
 
 Neste projeto eu utilizei React Context API para gerenciamento de estado global simples, implementado através do AuthContext, responsável por controlar informações de autenticação do usuário. Essa abordagem foi escolhida por ser leve, nativa do React e suficiente para a complexidade atual da aplicação. Caso o sistema evolua e passe a demandar um gerenciamento de estado mais robusto e escalável, uma possível evolução arquitetural seria a adoção de Redux, preferencialmente utilizando Redux Toolkit, que facilita a criação de stores, reducers e middlewares.
