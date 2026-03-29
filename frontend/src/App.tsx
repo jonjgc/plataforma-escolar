@@ -35,7 +35,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
           
           <div style={{ flex: 1 }}>
             <AppRoutes />

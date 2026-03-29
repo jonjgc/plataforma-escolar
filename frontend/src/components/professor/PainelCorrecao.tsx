@@ -8,7 +8,7 @@ import { Card } from '../ui/Card';
 interface PainelCorrecaoProps {
   atividade: Atividade;
   respostas: Resposta[];
-  nomeTurma: string; // <-- Recebendo o nome da turma
+  nomeTurma: string;
   onVoltar: () => void;
   onAvaliacaoSalva: () => void;
 }
@@ -63,7 +63,6 @@ const PainelCorrecao: React.FC<PainelCorrecaoProps> = ({ atividade, respostas, n
           {respostas.map(resp => (
             <div key={resp.id} style={{ padding: '20px', border: '1px solid #e0e0e0', borderRadius: '8px', background: '#fcfcfc' }}>
               
-              {/* NOME DO ALUNO AO INVÉS DE ID */}
               <div style={{ marginBottom: '15px' }}>
                 <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#2b3035' }}>
                   🧑‍🎓 Aluno: {resp.aluno_nome || `ID ${resp.aluno}`}
