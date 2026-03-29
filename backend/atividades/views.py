@@ -23,12 +23,23 @@ class MeAtividadesView(generics.ListAPIView):
             return Atividade.objects.filter(turma__alunos=user)
         return Atividade.objects.none()
 
-# Fluxo do PROFESSOR
+# Fluxo do PROFESSOR e listagem geral
 
 class AtividadeCreateView(generics.ListCreateAPIView):
-    queryset = Atividade.objects.all() 
+    # Removemos o queryset = Atividade.objects.all() daqui!
     serializer_class = AtividadeSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        
+        if user.role == 'PROFESSOR':
+            return Atividade.objects.filter(professor=user)
+            
+        elif user.role == 'ALUNO':
+            return Atividade.objects.filter(turma__alunos=user)
+            
+        return Atividade.objects.none()
 
     def perform_create(self, serializer):
         serializer.save(professor=self.request.user)
