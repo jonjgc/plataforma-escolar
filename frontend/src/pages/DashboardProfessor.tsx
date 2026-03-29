@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import CriarAtividadeForm from '../components/professor/CriarAtividadeForm';
 import PainelCorrecao from '../components/professor/PainelCorrecao';
@@ -29,12 +30,51 @@ export interface Resposta {
   feedback?: string | null;
 }
 
+const CorrecaoWrapper: React.FC<{ atividades: Atividade[], turmas: Turma[] }> = ({ atividades, turmas }) => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [respostas, setRespostas] = useState<Resposta[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const atividade = atividades.find(a => a.id === Number(id));
+
+  // Função isolada para carregar as respostas desta atividade
+  const carregarRespostas = async () => {
+    if (!atividade) return;
+    try {
+      const res = await api.get(`/atividades/${atividade.id}/respostas/`);
+      setRespostas(res.data);
+    } catch (error) {
+      console.error("Erro ao carregar respostas", error);
+      alert("Erro ao carregar as respostas desta atividade.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarRespostas();
+  }, [atividade]);
+
+  if (!atividade) return <p>Atividade não encontrada.</p>;
+  if (loading) return <p>Carregando respostas...</p>;
+
+  return (
+    <PainelCorrecao 
+      atividade={atividade} 
+      respostas={respostas} 
+      nomeTurma={turmas.find(t => t.id === atividade.turma)?.nome || 'Turma não identificada'}
+      onVoltar={() => navigate('/professor/atividades')}
+      onAvaliacaoSalva={carregarRespostas} 
+    />
+  );
+};
+
 const DashboardProfessor: React.FC = () => {
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [turmas, setTurmas] = useState<Turma[]>([]);
   
-  const [atividadeSelecionada, setAtividadeSelecionada] = useState<Atividade | null>(null);
-  const [respostas, setRespostas] = useState<Resposta[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
@@ -53,39 +93,28 @@ const DashboardProfessor: React.FC = () => {
     }
   };
 
-  const handleVerRespostas = async (atividade: Atividade) => {
-    setAtividadeSelecionada(atividade);
-    try {
-      const res = await api.get(`/atividades/${atividade.id}/respostas/`);
-      setRespostas(res.data);
-    } catch (error) {
-      console.error("Erro ao carregar respostas", error);
-      alert("Erro ao carregar as respostas desta atividade.");
-    }
-  };
-
   return (
    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
     <Header titulo="Portal do Professor" />
     
-    {!atividadeSelecionada ? (
+    <Routes>
+      <Route path="atividades" element={
         <>
           <CriarAtividadeForm turmas={turmas} onSucesso={carregarDados} />
-
           <section style={{ marginTop: '30px' }}>
             <h3>Atividades Publicadas (Clique em uma para ver as respostas)</h3>
-            <ListaAtividades atividades={atividades} onVerRespostas={handleVerRespostas} />
+            <ListaAtividades 
+              atividades={atividades} 
+              onVerRespostas={(atividade) => navigate(`/professor/correcao/${atividade.id}`)} 
+            />
           </section>
         </>
-      ) : (
-        <PainelCorrecao 
-          atividade={atividadeSelecionada} 
-          respostas={respostas} 
-          nomeTurma={turmas.find(t => t.id === atividadeSelecionada.turma)?.nome || 'Turma não identificada'}
-          onVoltar={() => setAtividadeSelecionada(null)} 
-          onAvaliacaoSalva={() => handleVerRespostas(atividadeSelecionada)} 
-        />
-      )}
+      } />
+
+      <Route path="correcao/:id" element={
+        <CorrecaoWrapper atividades={atividades} turmas={turmas} />
+      } />
+    </Routes>
     </div>
   );
 };

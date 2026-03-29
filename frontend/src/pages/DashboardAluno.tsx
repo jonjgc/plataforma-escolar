@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import FormularioResposta from '../components/aluno/FormularioResposta';
 import ListaAtividadesAluno from '../components/aluno/ListaAtividadesAluno';
@@ -19,13 +20,66 @@ export interface Resposta {
   feedback?: string | null;
 }
 
+const RespostaWrapper: React.FC<{ atividades: Atividade[], minhasRespostas: Resposta[], carregarDados: () => void }> = ({ atividades, minhasRespostas, carregarDados }) => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const atividadeSelecionada = atividades.find(a => a.id === Number(id));
+  const respostaEnviada = minhasRespostas.find(r => r.atividade === Number(id));
+  
+  const textoInicial = respostaEnviada ? respostaEnviada.texto : '';
+  const isEdicao = !!respostaEnviada;
+
+  const handleEnviarResposta = async (textoDigitado: string) => {
+    if (!atividadeSelecionada) return;
+
+    try {
+      if (isEdicao && respostaEnviada) {
+        await api.patch(`/respostas/${respostaEnviada.id}/`, { texto: textoDigitado });
+        alert('Resposta atualizada com sucesso!');
+      } else {
+        await api.post('/respostas/', {
+          texto: textoDigitado,
+          atividade: atividadeSelecionada.id
+        });
+        alert('Resposta enviada com sucesso!');
+      }
+      
+      carregarDados();
+      navigate('/aluno/atividades');
+      
+    } catch (error: any) {
+      console.error("Erro ao enviar resposta", error);
+      alert(error.response?.data?.detail || 'Erro ao processar sua resposta.');
+    }
+  };
+
+  return (
+    <>
+      <ListaAtividadesAluno 
+        atividades={atividades}
+        minhasRespostas={minhasRespostas}
+        atividadeSelecionadaId={atividadeSelecionada?.id || null}
+        onAbrirResposta={(atv) => navigate(`/aluno/responder/${atv.id}`)}
+      />
+
+      {atividadeSelecionada && (
+        <FormularioResposta 
+          atividade={atividadeSelecionada}
+          textoInicial={textoInicial}
+          isEdicao={isEdicao}
+          onSubmit={handleEnviarResposta}
+          onCancelar={() => navigate('/aluno/atividades')}
+        />
+      )}
+    </>
+  );
+};
+
 const DashboardAluno: React.FC = () => {
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [minhasRespostas, setMinhasRespostas] = useState<Resposta[]>([]);
-  
-  const [atividadeSelecionada, setAtividadeSelecionada] = useState<Atividade | null>(null);
-  const [respostaExistenteId, setRespostaExistenteId] = useState<number | null>(null);
-  const [textoInicial, setTextoInicial] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     carregarDados();
@@ -43,45 +97,6 @@ const DashboardAluno: React.FC = () => {
     }
   };
 
-  const handleAbrirResposta = (atv: Atividade) => {
-    setAtividadeSelecionada(atv);
-    const respostaEnviada = minhasRespostas.find(r => r.atividade === atv.id);
-    
-    if (respostaEnviada) {
-      setTextoInicial(respostaEnviada.texto);
-      setRespostaExistenteId(respostaEnviada.id);
-    } else {
-      setTextoInicial('');
-      setRespostaExistenteId(null);
-    }
-  };
-
-  const handleEnviarResposta = async (textoDigitado: string) => {
-    if (!atividadeSelecionada) return;
-
-    try {
-      if (respostaExistenteId) {
-        await api.patch(`/respostas/${respostaExistenteId}/`, { texto: textoDigitado });
-        alert('Resposta atualizada com sucesso!');
-      } else {
-        await api.post('/respostas/', {
-          texto: textoDigitado,
-          atividade: atividadeSelecionada.id
-        });
-        alert('Resposta enviada com sucesso!');
-      }
-      
-      setAtividadeSelecionada(null);
-      setRespostaExistenteId(null);
-      setTextoInicial('');
-      carregarDados();
-      
-    } catch (error: any) {
-      console.error("Erro ao enviar resposta", error);
-      alert(error.response?.data?.detail || 'Erro ao processar sua resposta.');
-    }
-  };
-
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
     <Header titulo="Portal do Aluno" />
@@ -89,22 +104,20 @@ const DashboardAluno: React.FC = () => {
     <main style={{ marginTop: '20px' }}>
         <h3>Suas Atividades</h3>
         
-        <ListaAtividadesAluno 
-          atividades={atividades}
-          minhasRespostas={minhasRespostas}
-          atividadeSelecionadaId={atividadeSelecionada?.id || null}
-          onAbrirResposta={handleAbrirResposta}
-        />
+        <Routes>
+          <Route path="atividades" element={
+            <ListaAtividadesAluno 
+              atividades={atividades}
+              minhasRespostas={minhasRespostas}
+              atividadeSelecionadaId={null}
+              onAbrirResposta={(atv) => navigate(`/aluno/responder/${atv.id}`)}
+            />
+          } />
 
-        {atividadeSelecionada && (
-          <FormularioResposta 
-            atividade={atividadeSelecionada}
-            textoInicial={textoInicial}
-            isEdicao={!!respostaExistenteId}
-            onSubmit={handleEnviarResposta}
-            onCancelar={() => setAtividadeSelecionada(null)}
-          />
-        )}
+          <Route path="responder/:id" element={
+            <RespostaWrapper atividades={atividades} minhasRespostas={minhasRespostas} carregarDados={carregarDados} />
+          } />
+        </Routes>
       </main>
     </div>
   );
