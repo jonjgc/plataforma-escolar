@@ -8,7 +8,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        token['role'] = user.role # <- Aqui a mágica acontece!
+        token['role'] = user.role
+        token['nome'] = user.nome 
+        
         return token
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -16,7 +18,6 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # Usamos a nossa View customizada no login
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     

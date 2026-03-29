@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import CriarAtividadeForm from '../components/professor/CriarAtividadeForm';
@@ -38,7 +39,6 @@ const CorrecaoWrapper: React.FC<{ atividades: Atividade[], turmas: Turma[] }> = 
 
   const atividade = atividades.find(a => a.id === Number(id));
 
-  // Função isolada para carregar as respostas desta atividade
   const carregarRespostas = async () => {
     if (!atividade) return;
     try {
@@ -73,6 +73,8 @@ const CorrecaoWrapper: React.FC<{ atividades: Atividade[], turmas: Turma[] }> = 
 const DashboardProfessor: React.FC = () => {
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [turmas, setTurmas] = useState<Turma[]>([]);
+  const { nome } = useContext(AuthContext);
+  const nomeProfessor = nome || 'Professor';
   
   const navigate = useNavigate();
 
@@ -96,6 +98,14 @@ const DashboardProfessor: React.FC = () => {
   return (
    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
     <Header titulo="Portal do Professor" />
+    <div style={{ margin: '20px 0', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+      <h2 style={{ fontSize: '24px', color: '#2b3035', margin: '0 0 5px 0' }}>
+        Bem-vindo(a), {nomeProfessor}! 👋
+      </h2>
+      <p style={{ color: '#6c757d', margin: '0', fontSize: '15px' }}>
+        Aqui está o resumo das suas turmas e atividades publicadas.
+      </p>
+    </div>
     
     <Routes>
       <Route path="atividades" element={

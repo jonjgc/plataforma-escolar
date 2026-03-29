@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import FormularioResposta from '../components/aluno/FormularioResposta';
@@ -80,6 +81,8 @@ const DashboardAluno: React.FC = () => {
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [minhasRespostas, setMinhasRespostas] = useState<Resposta[]>([]);
   const navigate = useNavigate();
+  const { nome } = useContext(AuthContext); 
+  const nomeAluno = nome || 'Aluno';
 
   useEffect(() => {
     carregarDados();
@@ -100,6 +103,14 @@ const DashboardAluno: React.FC = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
     <Header titulo="Portal do Aluno" />
+    <div style={{ margin: '20px 0', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+      <h2 style={{ fontSize: '24px', color: '#2b3035', margin: '0 0 5px 0' }}>
+        Bem-vindo(a), {nomeAluno}! 🎓
+      </h2>
+      <p style={{ color: '#6c757d', margin: '0', fontSize: '15px' }}>
+        Acompanhe suas atividades e prazos pendentes abaixo.
+      </p>
+    </div>
     
     <main style={{ marginTop: '20px' }}>
         <h3>Suas Atividades</h3>
