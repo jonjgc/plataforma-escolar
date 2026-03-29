@@ -5,6 +5,7 @@ import { Footer } from './components/ui/Footer';
 import Login from './pages/Login';
 import DashboardProfessor from './pages/DashboardProfessor';
 import DashboardAluno from './pages/DashboardAluno';
+import './index.css'
 
 const AppRoutes: React.FC = () => {
   const { token, role } = useContext(AuthContext);
@@ -35,7 +36,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           
           <div style={{ flex: 1 }}>
             <AppRoutes />

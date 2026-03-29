@@ -27,8 +27,7 @@ const Login: React.FC = () => {
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center', 
-      minHeight: '100vh', 
-      backgroundColor: '#f4f7f6',
+      minHeight: '100vh',
       fontFamily: 'sans-serif'
     }}>
       <div style={{ width: '100%', maxWidth: '400px', padding: '20px' }}>
